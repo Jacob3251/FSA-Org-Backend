@@ -36,6 +36,7 @@ async function run() {
       const query = {};
       const cursor = blogCollection.find(query);
       const blogs = await cursor.toArray();
+      // hello
       res.send(blogs);
     });
     app.get("/events", async (req, res) => {
