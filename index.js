@@ -2,7 +2,6 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion } = require("mongodb");
-
 const ObjectId = require("mongodb").ObjectId;
 
 const port = process.env.PORT || 5000;
@@ -32,6 +31,9 @@ async function run() {
     // Send a ping to confirm a successful connection
     const blogCollection = client.db("BlogDb").collection("Blogs");
     const deedCollection = client.db("DeedDb").collection("Deeds");
+    const participatedVolunteerCollection = client
+      .db("EventInformation")
+      .collection("participatedVolunteers");
     app.get("/blogs", async (req, res) => {
       const query = {};
       const cursor = blogCollection.find(query);
@@ -44,6 +46,26 @@ async function run() {
       const cursor = deedCollection.find(query);
       const deeds = await cursor.toArray();
       res.send(deeds);
+    });
+    app.get("/eventSelection", async (req, res) => {
+      const query = {};
+      const cursor = participatedVolunteerCollection.find(query);
+      const participatedVolunteers = await cursor.toArray();
+      res.send(participatedVolunteers);
+    });
+    app.post("/eventSelection", async (req, res) => {
+      const data = req.body;
+      const result = await participatedVolunteerCollection.insertOne(data);
+      res.send(result);
+    });
+    app.delete("/eventSelection/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+
+      const query = { _id: new ObjectId(id) };
+      const result = await participatedVolunteerCollection.deleteOne(query);
+      res.send(result);
+      // console.log(result);
     });
     app.get("/blogs/:id", async (req, res) => {
       const id = req.params.id;
