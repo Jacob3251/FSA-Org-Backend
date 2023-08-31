@@ -31,9 +31,56 @@ async function run() {
     // Send a ping to confirm a successful connection
     const blogCollection = client.db("BlogDb").collection("Blogs");
     const deedCollection = client.db("DeedDb").collection("Deeds");
+    const profileCollection = client.db("ProfileDB").collection("users");
+    const donationCollection = client.db("DonationDb").collection("Donations");
+    const requestedParticipators = client
+      .db("EventInformation")
+      .collection("requestedVolunteers");
+    const unverifiedDonationCollection = client
+      .db("DonationDb")
+      .collection("Unverfied");
     const participatedVolunteerCollection = client
       .db("EventInformation")
       .collection("participatedVolunteers");
+    const completedVolunteerCollection = client
+      .db("EventInformation")
+      .collection("completedEvents");
+    app.get("/donations", async (req, res) => {
+      const query = {};
+      const cursor = donationCollection.find(query);
+      const blogs = await cursor.toArray();
+      // hello
+      res.send(blogs);
+    });
+    app.get("/unverified-donations", async (req, res) => {
+      const query = {};
+      const cursor = unverifiedDonationCollection.find(query);
+      const blogs = await cursor.toArray();
+      // hello
+      res.send(blogs);
+    });
+    app.post("/donations", async (req, res) => {
+      const data = req.body;
+      const result = await donationCollection.insertOne(data);
+      const query = { _id: new ObjectId(data._id) };
+
+      const result1 = await unverifiedDonationCollection.deleteOne(query);
+      res.send(result);
+    });
+    app.post("/unverified-donations", async (req, res) => {
+      const data = req.body;
+      const result = await unverifiedDonationCollection.insertOne(data);
+      res.send(result);
+    });
+    app.delete("/unverified-donations/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await unverifiedDonationCollection.deleteOne(query);
+      res.send(result);
+      // console.log(result);
+    });
+    // have to blogs upddate  & delete api
     app.get("/blogs", async (req, res) => {
       const query = {};
       const cursor = blogCollection.find(query);
@@ -41,11 +88,57 @@ async function run() {
       // hello
       res.send(blogs);
     });
+    app.get("/profile/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const data = await profileCollection.findOne(query);
+      // hello
+      res.send(data);
+    });
+    app.get("/participator/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const result = participatedVolunteerCollection.find(query);
+      const data = await result.toArray();
+      // hello
+      res.send(data);
+    });
+    app.post("/profile", async (req, res) => {
+      const data = req.body;
+      const result = await profileCollection.insertOne(data);
+      res.send(result);
+    });
+    app.post("/blogs", async (req, res) => {
+      const data = req.body;
+      const result = await blogCollection.insertOne(data);
+      res.send(result);
+    });
+    app.delete("/blogs/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: new ObjectId(id) };
+      const result = await blogCollection.deleteOne(query);
+      res.send(result);
+      // console.log(result);
+    });
     app.get("/events", async (req, res) => {
       const query = {};
       const cursor = deedCollection.find(query);
       const deeds = await cursor.toArray();
       res.send(deeds);
+    });
+    app.post("/events", async (req, res) => {
+      const data = req.body;
+      const result = await deedCollection.insertOne(data);
+      res.send(result);
+    });
+    app.delete("/events/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log("event to be deleted", id);
+      const query = { _id: new ObjectId(id) };
+      const result = await deedCollection.deleteOne(query);
+      res.send(result);
+      console.log(result);
     });
     app.get("/eventSelection", async (req, res) => {
       const query = {};
@@ -57,6 +150,61 @@ async function run() {
       const data = req.body;
       const result = await participatedVolunteerCollection.insertOne(data);
       res.send(result);
+    });
+    app.get("/requestEvent", async (req, res) => {
+      const query = {};
+      const cursor = requestedParticipators.find(query);
+      const participatedVolunteers = await cursor.toArray();
+      res.send(participatedVolunteers);
+    });
+    app.get("/requestEvent/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const cursor = requestedParticipators.find(query);
+      const participatedVolunteers = await cursor.toArray();
+      res.send(participatedVolunteers);
+    });
+    app.post("/requestEvent", async (req, res) => {
+      const data = req.body;
+      const result = await requestedParticipators.insertOne(data);
+      res.send(result);
+    });
+    app.delete("/requestEvent/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+
+      const query = { _id: new ObjectId(id) };
+      const result = await requestedParticipators.deleteOne(query);
+      res.send(result);
+      // console.log(result);
+    });
+    // completed events volunteer list
+    app.get("/completedEvent", async (req, res) => {
+      const query = {};
+      const cursor = completedVolunteerCollection.find(query);
+      const participatedVolunteers = await cursor.toArray();
+      res.send(participatedVolunteers);
+    });
+    app.get("/completedEvent/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const cursor = completedVolunteerCollection.find(query);
+      const participatedVolunteers = await cursor.toArray();
+      res.send(participatedVolunteers);
+    });
+    app.post("/completedEvent", async (req, res) => {
+      const data = req.body;
+      const result = await completedVolunteerCollection.insertOne(data);
+      res.send(result);
+    });
+    app.delete("/completedEvent/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+
+      const query = { _id: new ObjectId(id) };
+      const result = await completedVolunteerCollection.deleteOne(query);
+      res.send(result);
+      // console.log(result);
     });
     app.delete("/eventSelection/:id", async (req, res) => {
       const id = req.params.id;
