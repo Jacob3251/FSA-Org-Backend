@@ -184,6 +184,7 @@ async function run() {
       const cursor = completedVolunteerCollection.find(query);
       const participatedVolunteers = await cursor.toArray();
       res.send(participatedVolunteers);
+      console.log("hello");
     });
     app.get("/completedEvent/:email", async (req, res) => {
       const email = req.params.email;
